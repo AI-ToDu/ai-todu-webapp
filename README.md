@@ -9,7 +9,7 @@
 
 ### 🌍 [Ver Demo en Vivo (GitHub Pages)](https://ai-todu.github.io/ai-todu-webapp/)
 
-> **Nota para evaluación:** la revisión TB1 **v0.2.0** utiliza una **Fake REST API persistente**. El recorrido local usa HTTP y almacenamiento JSON; la alternativa estática usa Service Worker e IndexedDB. Se trabaja con datos ficticios, sin pagos reales ni comprobantes fiscales. Java/Spring Boot, PostgreSQL y seguridad de producción pertenecen a una fase posterior. La versión pública debe contrastarse con la rama de revisión antes de presentarla.
+> **AV2 · Sprint 3:** la aplicación se conecta al [backend Java/Spring Boot](https://github.com/AI-ToDu/ai-todu-api) con PostgreSQL, JWT revocables, roles y aislamiento por empresa. El espacio nuevo inicia sin datos: crea una cuenta con información ficticia. Se conserva la Fake API de TB1 como modo opcional de demostración. No se realizan pagos reales ni se emiten documentos fiscales.
 
 ---
 
@@ -22,7 +22,7 @@ La aplicación organiza sus responsabilidades siguiendo principios de **Domain-D
 * 📥 **Procurement:** órdenes de compra y recepción física parcial.
 * 🛒 **Sales:** POS, validación de stock, recibo histórico de demostración y devoluciones.
 * 🔔 **Notifications:** bandeja de avisos operativos.
-* 🔐 **IAM:** acceso, perfiles demo, autorización y protección de rutas.
+* 🔐 **IAM:** registro de empresa, sesión JWT, autorización y provisión de empleados con contraseña inicial.
 * 📊 **Reporting:** indicadores derivados de operaciones registradas.
 * ⚙️ **Shared:** modelos, adaptador HTTP, componentes comunes e internacionalización.
 
@@ -57,7 +57,8 @@ Los módulos funcionales contienen sus vistas en `presentation/`. El motor de de
 * **Framework:** Angular 22 con Standalone Components, Signals y HttpClient.
 * **Interfaz:** Angular Material, diseño responsive, diálogos y controles etiquetados.
 * **Internacionalización:** inglés predeterminado (`en_US`) y español latinoamericano (`es_419`).
-* **Persistencia demo:** JSON por HTTP local o IndexedDB en el navegador, según el transporte elegido.
+* **Persistencia AV2:** PostgreSQL a través de la API remota. La demo opcional conserva JSON por HTTP local o IndexedDB.
+* **Integración externa:** clima regional de Lima mediante el gateway Open-Meteo del backend; la operación continúa si el proveedor no responde.
 * **Reglas operativas:** recepción parcial, rechazo de sobreventa, conservación de productos, anulación y devoluciones con validaciones.
 * **Calidad:** pruebas de dominio, permisos/tenant, concurrencia HTTP, persistencia tras reinicio, migración de recibos y cobertura de traducciones.
 
@@ -70,7 +71,7 @@ Los módulos funcionales contienen sus vistas en `presentation/`. El motor de de
 1. Clona la rama de revisión:
 
    ```sh
-   git clone --branch fix/tb1-readiness https://github.com/AI-ToDu/ai-todu-webapp.git
+   git clone --branch main https://github.com/AI-ToDu/ai-todu-webapp.git
    cd ai-todu-webapp
    ```
 
@@ -80,7 +81,7 @@ Los módulos funcionales contienen sus vistas en `presentation/`. El motor de de
    npm ci
    ```
 
-3. Ejecuta la demostración integrada:
+3. Para trabajar con el backend local, inicia ai-todu-api en el puerto 8080 y ejecuta `npm start`; abre http://localhost:4200. Para ejecutar la demostración HTTP opcional:
 
    ```sh
    npm run demo
@@ -88,7 +89,9 @@ Los módulos funcionales contienen sus vistas en `presentation/`. El motor de de
 
 4. Abre [http://127.0.0.1:8850/?api=http](http://127.0.0.1:8850/?api=http). El comando compila la interfaz y sirve el adaptador HTTP en el mismo puerto.
 
-El estado se conserva en `.demo-data/state.json`, excluido de Git. La recarga y el reinicio del servidor conservan las transacciones aceptadas. La selección HTTP persiste al navegar o recargar dentro de la pestaña.
+El estado se conserva en `.demo-data/state.json`, excluido de Git. La recarga y el reinicio del servidor demo conservan sus transacciones aceptadas. La selección HTTP persiste al navegar o recargar dentro de la pestaña.
+
+En la publicación AV2, el transporte predeterminado es https://ai-todu-api-av2.onrender.com/api/v1/. No cambia silenciosamente a datos ficticios si la API falla. Usa `?api=demo` para la demo de navegador y `?api=server` para volver al servidor; las sesiones se almacenan por separado. El servicio gratuito puede necesitar aproximadamente un minuto para iniciar tras inactividad.
 
 ### Publicación estática
 
@@ -135,7 +138,7 @@ npm run build:pages
 
 Las pruebas cubren reglas, aislamiento por empresa/rol, concurrencia HTTP real, persistencia, recibos, el diseño SQL de 35 tablas, traducciones e integridad de las fuentes copiadas. La compilación mantiene el presupuesto original del bundle. La investigación con usuarios y una auditoría completa de accesibilidad siguen pendientes.
 
-El [DDL de 35 tablas](database/schema.sql), validado en SQLite, es un destino de migración relacional; la demo usa 35 colecciones JSON. Aún faltan flujos completos de lotes/ubicaciones/variantes, múltiples paradas e intentos, administración de clientes, activación/recuperación de empleados, suscripciones, integraciones fiscales/de pago y servicios productivos Java/PostgreSQL.
+El [DDL de 35 tablas](database/schema.sql), validado en SQLite, es un destino de migración relacional; la demo usa 35 colecciones JSON. El backend AV2 implementa su propio esquema mediante migraciones Flyway y modelos JPA separados del dominio. El modelo de 35 tablas sigue siendo una referencia de alcance futuro. Faltan flujos completos de lotes/ubicaciones/variantes, múltiples paradas e intentos, administración de clientes, recuperación de acceso, suscripciones e integraciones fiscales/de pago.
 
 ### Fuente Canónica de la Fake API
 
@@ -149,11 +152,13 @@ Después ejecutar pruebas y compilación. Las copias del motor se actualizan med
 
 ### Ramas y Publicación
 
-La revisión se mantiene en `fix/tb1-readiness`. `develop` conserva la base inicial y la publicación del frontend revisado se realiza desde `main` tras la integración. El workflow verifica fix/PR y restringe Pages a main. La configuración pública registrada utilizaba `gh-pages`; comprobar su origen y el cambio a Actions antes de dar por publicada esta revisión. Consultar [REVIEW.md](REVIEW.md).
+AV2 se prepara en `fix/av2-api-integration`. El workflow verifica fix/PR y publica Pages desde `main` al integrar los cambios. GitHub Pages utiliza GitHub Actions desde el 7 de noviembre de 2026; la configuración anterior de `gh-pages` fue sustituida. Las notas de revisión y avances se mantienen fuera del repositorio.
 
 ---
 
 ## 🔗 Ecosistema del Proyecto
+
+* **[Backend REST](https://github.com/AI-ToDu/ai-todu-api):** dominio Java, PostgreSQL, Outbox y contratos. [Swagger UI](https://ai-todu-api-av2.onrender.com/swagger-ui.html).
 
 * **[Landing Page](https://github.com/AI-ToDu/ai-todu-platform/tree/fix/tb1-readiness):** presentación del producto y acceso a la demo.
 * **[Frontend](https://github.com/AI-ToDu/ai-todu-webapp/tree/fix/tb1-readiness):** espacio de trabajo Angular.

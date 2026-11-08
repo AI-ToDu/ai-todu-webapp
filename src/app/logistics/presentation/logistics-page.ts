@@ -1,6 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { Page, UI, State, options } from '../../shared/presentation/ui';
 import { Row } from '../../shared/domain/models';
+import { transportConfig } from '../../shared/infrastructure/transport';
+interface Weather {
+  location: string;
+  temperatureC: number;
+  precipitationMm: number;
+  windKmh: number;
+  observedAt: string;
+}
 @Component({
   standalone: true,
   imports: [...UI, State],
@@ -22,6 +30,23 @@ import { Row } from '../../shared/domain/models';
       </div>
     </header>
     <app-state [busy]="busy()" [error]="error()" />
+    @if (server) {
+      <aside class="surface weather-note" aria-live="polite">
+        <strong>{{ i.t('weatherTitle') }}</strong>
+        @if (weather(); as w) {
+          <p>
+            {{ w.location }} · {{ w.temperatureC }} °C · {{ i.t('precipitation') }}:
+            {{ w.precipitationMm }} mm · {{ i.t('wind') }}: {{ w.windKmh }} km/h
+          </p>
+          <small
+            >{{ i.t('weatherHint') }} · {{ i.formatDate(w.observedAt) }} ·
+            <a href="https://open-meteo.com/">Open-Meteo</a></small
+          >
+        } @else {
+          <p>{{ i.t(weatherError() ? 'weatherUnavailable' : 'loading') }}</p>
+        }
+      </aside>
+    }
     <div class="dispatch-board">
       @for (status of statuses; track status) {
         <section class="dispatch-column">
@@ -68,6 +93,9 @@ import { Row } from '../../shared/domain/models';
     </div>`,
 })
 export class LogisticsPage extends Page {
+  readonly server = transportConfig().mode === 'server';
+  readonly weather = signal<Weather | null>(null);
+  readonly weatherError = signal(false);
   readonly statuses = ['PENDING', 'IN_TRANSIT', 'DELIVERED'];
   readonly candidates = signal<Row[]>([]);
   readonly drivers = signal<Row[]>([]);
@@ -75,6 +103,11 @@ export class LogisticsPage extends Page {
   constructor() {
     super();
     void this.reload();
+    if (this.server)
+      void this.api
+        .request<Weather>('GET', 'logistics/weather')
+        .then((w) => this.weather.set(w))
+        .catch(() => this.weatherError.set(true));
   }
   async reload() {
     try {

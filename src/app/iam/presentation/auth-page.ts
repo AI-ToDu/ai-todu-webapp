@@ -4,6 +4,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { UI } from '../../shared/presentation/ui';
 import { I18n } from '../../shared/application/i18n';
 import { Api, Session } from '../../shared/infrastructure/api';
+import { transportConfig } from '../../shared/infrastructure/transport';
 @Component({
   standalone: true,
   imports: [...UI, RouterLink],
@@ -21,9 +22,9 @@ import { Api, Session } from '../../shared/infrastructure/api';
     </section>
     <section class="auth-panel">
       <div class="auth-card">
-        <span class="eyebrow">{{ i.t('demoAccess') }}</span>
+        <span class="eyebrow">{{ i.t(server ? 'workspace' : 'demoAccess') }}</span>
         <h2>{{ i.t(register ? 'register' : 'login') }}</h2>
-        <p>{{ i.t('demoNote') }}</p>
+        <p>{{ i.t(server ? 'serverNote' : 'demoNote') }}</p>
         <form [formGroup]="form" (ngSubmit)="submit()">
           @if (register) {
             <mat-form-field appearance="outline"
@@ -57,7 +58,7 @@ import { Api, Session } from '../../shared/infrastructure/api';
             {{ i.t(pending() ? 'loading' : register ? 'register' : 'login') }}
           </button>
         </form>
-        @if (!register) {
+        @if (!register && !server) {
           <div class="demo-login">
             <strong>{{ i.t('demoAccess') }}</strong
             ><code>{{ demoEmail }}</code
@@ -75,6 +76,7 @@ import { Api, Session } from '../../shared/infrastructure/api';
   </div>`,
 })
 export class AuthPage {
+  readonly server = transportConfig().mode === 'server';
   readonly demoEmail =
     new URLSearchParams(location.search).get('role') === 'warehouse'
       ? 'warehouse@demo.ai-todu.test'
