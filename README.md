@@ -138,11 +138,11 @@ npm run build:pages
 
 Las pruebas cubren reglas, aislamiento por empresa/rol, concurrencia HTTP real, persistencia, recibos, el diseño SQL de 35 tablas, traducciones e integridad de las fuentes copiadas. La compilación mantiene el presupuesto original del bundle. La investigación con usuarios y una auditoría completa de accesibilidad siguen pendientes.
 
-El [DDL de 35 tablas](database/schema.sql), validado en SQLite, es un destino de migración relacional; la demo usa 35 colecciones JSON. El backend AV2 implementa su propio esquema mediante migraciones Flyway y modelos JPA separados del dominio. El modelo de 35 tablas sigue siendo una referencia de alcance futuro. Faltan flujos completos de lotes/ubicaciones/variantes, múltiples paradas e intentos, administración de clientes, recuperación de acceso, suscripciones e integraciones fiscales/de pago.
+El [DDL de 35 tablas](database/schema.sql), validado en SQLite, es un destino de migración relacional; la demo usa 35 colecciones JSON. El backend AV2 ejecuta 19 tablas de aplicación/infraestructura, además del historial Flyway, con modelos JPA separados del dominio. El OpenAPI del backend documenta 34 operaciones; public/mock/openapi.json corresponde únicamente a la demo. El modelo de 35 tablas sigue siendo una referencia de alcance futuro. Faltan flujos completos de lotes/ubicaciones/variantes, múltiples paradas e intentos, administración de clientes, recuperación de acceso, suscripciones e integraciones fiscales/de pago.
 
 ### Fuente Canónica de la Fake API
 
-[ai-todu-fake-api](https://github.com/AI-ToDu/ai-todu-fake-api/tree/fix/tb1-readiness) mantiene el motor, adaptador HTTP, OpenAPI y base relacional. [mock-provenance.json](mock-provenance.json) fija el commit y los hashes normalizados. Tras modificar y confirmar el motor allí, sincronizar desde este repositorio:
+[ai-todu-fake-api](https://github.com/AI-ToDu/ai-todu-fake-api/tree/main) mantiene el motor, adaptador HTTP, OpenAPI y base relacional. [mock-provenance.json](mock-provenance.json) fija el commit y los hashes normalizados. Tras modificar y confirmar el motor allí, sincronizar desde este repositorio:
 
 ```sh
 npm run mock:sync -- ../ai-todu-fake-api
@@ -152,18 +152,18 @@ Después ejecutar pruebas y compilación. Las copias del motor se actualizan med
 
 ### Ramas y Publicación
 
-AV2 se prepara en `fix/av2-api-integration`. El workflow verifica fix/PR y publica Pages desde `main` al integrar los cambios. GitHub Pages utiliza GitHub Actions desde el 7 de noviembre de 2026; la configuración anterior de `gh-pages` fue sustituida. Las notas de revisión y avances se mantienen fuera del repositorio.
+AV2 está integrado en `main` (v0.3.0). Las correcciones posteriores se revisan en ramas `fix/...`. El workflow verifica fix/PR y publica Pages desde `main` al integrar los cambios. GitHub Pages utiliza GitHub Actions desde el 7 de noviembre de 2026; la configuración anterior de `gh-pages` fue sustituida. Las notas de revisión y avances se mantienen fuera del repositorio.
 
 ---
 
 ## 🔗 Ecosistema del Proyecto
 
-* **[Backend REST](https://github.com/AI-ToDu/ai-todu-api):** dominio Java, PostgreSQL, Outbox y contratos. [Swagger UI](https://ai-todu-api-av2.onrender.com/swagger-ui.html).
+* **[Backend REST](https://github.com/AI-ToDu/ai-todu-api):** dominio Java, PostgreSQL, Transactional Outbox Pattern y contratos. [Swagger UI](https://ai-todu-api-av2.onrender.com/swagger-ui.html).
 
-* **[Landing Page](https://github.com/AI-ToDu/ai-todu-platform/tree/fix/tb1-readiness):** presentación del producto y acceso a la demo.
-* **[Frontend](https://github.com/AI-ToDu/ai-todu-webapp/tree/fix/tb1-readiness):** espacio de trabajo Angular.
-* **[Fake REST API](https://github.com/AI-ToDu/ai-todu-fake-api/tree/fix/tb1-readiness):** motor canónico de demostración y contrato OpenAPI.
-* **[Informe](https://github.com/AI-ToDu/ai-todu-report/tree/fix/tb1-readiness):** requisitos, arquitectura, diseño de datos y evidencias.
+* **[Landing Page](https://github.com/AI-ToDu/ai-todu-platform/tree/develop):** presentación del producto y acceso a la demo.
+* **[Frontend](https://github.com/AI-ToDu/ai-todu-webapp/tree/main):** espacio de trabajo Angular.
+* **[Fake REST API](https://github.com/AI-ToDu/ai-todu-fake-api/tree/main):** motor canónico de demostración y contrato OpenAPI.
+* **[Informe](https://github.com/AI-ToDu/ai-todu-report/tree/main):** requisitos, arquitectura, diseño de datos y evidencias.
 
 ---
 
