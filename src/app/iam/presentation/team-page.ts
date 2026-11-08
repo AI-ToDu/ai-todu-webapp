@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Page, UI, State } from '../../shared/presentation/ui';
+import { transportConfig } from '../../shared/infrastructure/transport';
 @Component({
   standalone: true,
   imports: [...UI, State],
@@ -7,7 +8,7 @@ import { Page, UI, State } from '../../shared/presentation/ui';
       <h1>{{ i.t('team') }}</h1>
       <button mat-flat-button (click)="create()">+ {{ i.t('newEmployee') }}</button>
     </header>
-    <p class="info-note">{{ i.t('activationNote') }}</p>
+    <p class="info-note">{{ i.t(server ? 'employeePasswordNote' : 'activationNote') }}</p>
     <app-state [busy]="busy()" [error]="error()" />
     <section class="surface table-scroll">
       <table>
@@ -33,6 +34,7 @@ import { Page, UI, State } from '../../shared/presentation/ui';
     </section>`,
 })
 export class TeamPage extends Page {
+  readonly server = transportConfig().mode === 'server';
   constructor() {
     super();
     void this.load('employees');
@@ -45,6 +47,9 @@ export class TeamPage extends Page {
         fields: [
           { key: 'name', label: 'fullName' },
           { key: 'email', label: 'email', type: 'email' },
+          ...(this.server
+            ? [{ key: 'password', label: 'password', type: 'password' as const }]
+            : []),
           {
             key: 'role',
             label: 'role',

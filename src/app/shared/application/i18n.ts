@@ -1,5 +1,20 @@
 import { Injectable, signal } from '@angular/core';
 const en: Record<string, string> = {
+  serverNote:
+    'Your workspace is stored on the server and shared with its authorized users. Use fictional data for academic evaluation.',
+  employeePasswordNote:
+    'Set an initial password of at least 8 characters and share it with the employee through a private channel.',
+  weatherTitle: 'Regional weather for dispatch planning',
+  weatherHint: 'Reference conditions for central Lima; confirm conditions on your route',
+  precipitation: 'Precipitation',
+  wind: 'Wind',
+  weatherUnavailable: 'Weather is temporarily unavailable. You can continue managing dispatches.',
+  SALE_CONFIRMED: 'Sale confirmed',
+  DELIVERY_CONFIRMED: 'Delivery confirmed',
+  UPSTREAM_UNAVAILABLE: 'The external service is temporarily unavailable.',
+  IDEMPOTENCY_CONFLICT: 'This request identifier was already used with different data.',
+  CONFLICT: 'A record with those details already exists.',
+  INTERNAL_ERROR: 'The server could not complete the operation. Please retry.',
   app: 'AI-ToDu',
   type: 'Movement type',
   passwordHint: 'At least 8 characters',
@@ -72,7 +87,7 @@ const en: Record<string, string> = {
   pending: 'Pending',
   add: 'Add',
   cart: 'Current sale',
-  checkout: 'Confirm demo sale',
+  checkout: 'Confirm sale',
   total: 'Total',
   unitPrice: 'Price',
   stock: 'Stock',
@@ -103,7 +118,7 @@ const en: Record<string, string> = {
   lowStock: 'Low stock products',
   activeDispatches: 'Dispatches in transit',
   saleCount: 'Confirmed sales',
-  overviewHint: 'Calculated from the recorded demo transactions.',
+  overviewHint: 'Calculated from the transactions recorded in this workspace.',
   marginNote:
     'Gross contribution deducts product cost and recorded stock losses. It is not net business profit.',
   workflow: 'Your operational flow',
@@ -125,7 +140,7 @@ const en: Record<string, string> = {
   terms: 'Terms of use',
   legalTitle: 'Academic demo terms and privacy',
   legalText:
-    'This prototype is for university evaluation with fictional data. Do not enter personal, financial or business confidential information. Demo records are stored in this browser, or in the local demo server when that transport is selected. Clear site data to erase browser records. There are no real payments, SUNAT documents, commercial subscriptions or production security guarantees.',
+    'This prototype is for university evaluation with fictional data. Avoid personal, financial and confidential business information. In server mode, workspace records are stored in PostgreSQL and accessible to authorized workspace users. Your session token is stored in this browser until sign-out or expiry. Optional demo mode keeps records in this browser or the local demo server. No real payments or SUNAT documents are issued. The dispatch weather panel sends only fixed coordinates for central Lima to Open-Meteo.',
   back: 'Back to workspace',
   notFound: 'Page not found',
   goHome: 'Open workspace',
@@ -182,7 +197,7 @@ const en: Record<string, string> = {
   NOT_FOUND: 'The requested record is unavailable.',
   STORAGE_UNAVAILABLE:
     'Demo storage is unavailable. Allow site storage or try the local HTTP demo.',
-  NETWORK_ERROR: 'The API could not be reached. Check the demo setup and retry.',
+  NETWORK_ERROR: 'The API could not be reached. Wait for the server to start and retry.',
 };
 @Injectable({ providedIn: 'root' })
 export class I18n {
