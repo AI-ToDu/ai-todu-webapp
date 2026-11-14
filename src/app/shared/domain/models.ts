@@ -19,6 +19,8 @@ export interface Row {
   total?: number;
   createdAt?: string;
   productId?: string;
+  actorId?: string;
+  userId?: string;
   delta?: number;
   type?: string;
   reason?: string;

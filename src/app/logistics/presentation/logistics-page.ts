@@ -29,7 +29,7 @@ interface Weather {
         </button>
       </div>
     </header>
-    <app-state [busy]="busy()" [error]="error()" />
+    <app-state [busy]="busy() || running()" [error]="error()" />
     @if (server) {
       <aside class="surface weather-note" aria-live="polite">
         <strong>{{ i.t('weatherTitle') }}</strong>
@@ -77,12 +77,18 @@ interface Weather {
               }
               <div class="card-actions">
                 @if (status === 'PENDING') {
-                  <button mat-flat-button (click)="start(d)">{{ i.t('startRoute') }}</button>
+                  <button mat-flat-button (click)="start(d)" [disabled]="running()">
+                    {{ i.t(running() ? 'saving' : 'startRoute') }}
+                  </button>
                 }
                 @if (status === 'IN_TRANSIT') {
-                  <button mat-flat-button (click)="deliver(d)">{{ i.t('deliver') }}</button>
+                  <button mat-flat-button (click)="deliver(d)" [disabled]="running()">
+                    {{ i.t('deliver') }}
+                  </button>
                 }
-                <button mat-button (click)="incident(d)">{{ i.t('incident') }}</button>
+                <button mat-button (click)="incident(d)" [disabled]="running()">
+                  {{ i.t('incident') }}
+                </button>
               </div>
             </article>
           } @empty {
@@ -110,6 +116,7 @@ export class LogisticsPage extends Page {
         .catch(() => this.weatherError.set(true));
   }
   async reload() {
+    this.busy.set(true);
     try {
       const [c, d, v] = await Promise.all([
         this.api.list('dispatch-candidates'),
@@ -122,6 +129,8 @@ export class LogisticsPage extends Page {
       await this.load('dispatches');
     } catch (e) {
       this.error.set((e as Error).message);
+    } finally {
+      this.busy.set(false);
     }
   }
   byStatus(status: string) {
@@ -146,7 +155,7 @@ export class LogisticsPage extends Page {
         ],
         payload: (v) => ({ ...v, saleIds: [v['saleId']] }),
       },
-      () => void this.reload(),
+      () => this.reload(),
     );
   }
   start(d: Row) {

@@ -179,11 +179,14 @@ export class SalesPage extends Page {
     void this.reload();
   }
   async reload() {
+    this.busy.set(true);
     try {
       this.products.set(await this.api.list('products'));
       await this.load('sales');
     } catch (e) {
       this.error.set((e as Error).message);
+    } finally {
+      this.busy.set(false);
     }
   }
   add(p: Row) {

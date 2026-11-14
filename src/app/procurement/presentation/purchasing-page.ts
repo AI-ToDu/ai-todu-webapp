@@ -79,6 +79,7 @@ export class PurchasingPage extends Page {
     void this.reload();
   }
   async reload() {
+    this.busy.set(true);
     this.error.set('');
     try {
       const [p, s] = await Promise.all([this.api.list('products'), this.api.list('suppliers')]);
@@ -87,6 +88,8 @@ export class PurchasingPage extends Page {
       await this.load('purchases');
     } catch (e) {
       this.error.set((e as Error).message);
+    } finally {
+      this.busy.set(false);
     }
   }
   supplierName(o: Row) {

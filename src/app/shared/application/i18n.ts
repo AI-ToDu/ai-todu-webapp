@@ -1,5 +1,11 @@
 import { Injectable, signal } from '@angular/core';
 const en: Record<string, string> = {
+  performedBy: 'Performed by',
+  userReference: 'User reference',
+  actorUnavailable: 'Not recorded',
+  saleConfirmationReason: 'Sale confirmation',
+  purchaseReceiptReason: 'Purchase receipt',
+  lastKnownStock: 'Last consulted available units',
   addToCart: 'Add to sale',
   outOfStock: 'Out of stock',
   unavailableForSale: 'Not available for sale',
@@ -242,11 +248,18 @@ export class I18n {
       currency: 'PEN',
     }).format(value ?? 0);
   }
-  formatDate(value: string | undefined) {
+  movementReason(value: string | undefined) {
+    if (!value) return '—';
+    if (value === 'Sale confirmation') return this.t('saleConfirmationReason');
+    if (value.startsWith('Purchase receipt PO-'))
+      return this.t('purchaseReceiptReason') + ' ' + value.slice('Purchase receipt '.length);
+    return value;
+  }
+  formatDate(value: string | undefined, precise = false) {
     return value
       ? new Intl.DateTimeFormat(this.lang() === 'en_US' ? 'en-US' : 'es-PE', {
           dateStyle: 'medium',
-          timeStyle: 'short',
+          timeStyle: precise ? 'long' : 'short',
         }).format(new Date(value))
       : '—';
   }

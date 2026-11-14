@@ -196,5 +196,11 @@
   "unavailableForSale": "No disponible para venta",
   "productsCount": "productos",
   "availableUnits": "Unidades disponibles",
-  "saving": "Guardando… Espera un momento"
+  "saving": "Guardando… Espera un momento",
+  "performedBy": "Responsable",
+  "userReference": "Referencia de usuario",
+  "actorUnavailable": "No registrado",
+  "saleConfirmationReason": "Confirmación de venta",
+  "purchaseReceiptReason": "Recepción de compra",
+  "lastKnownStock": "Último saldo disponible consultado"
 }

@@ -38,6 +38,8 @@ export interface FormSpec {
   path: string;
   method?: string;
   payload?: (value: Record<string, unknown>) => unknown;
+  hint?: (value: Record<string, unknown>) => string;
+  onRejected?: (code: string) => Promise<void>;
 }
 @Component({
   standalone: true,
@@ -71,6 +73,9 @@ export interface FormSpec {
             >
           }
         </div>
+        @if (data.hint) {
+          <p class="form-hint" role="status">{{ data.hint(form.getRawValue()) }}</p>
+        }
         @if (error()) {
           <p class="error" role="alert">{{ i.t(error()) }}</p>
         }</mat-dialog-content
@@ -119,6 +124,11 @@ export class FormDialog {
       this.ref.close(result);
     } catch (e) {
       this.error.set((e as Error).message);
+      try {
+        await this.data.onRejected?.((e as Error).message);
+      } catch {
+        // Keep the original rejection visible if refreshing context also fails.
+      }
     } finally {
       this.pending.set(false);
     }
@@ -152,6 +162,7 @@ export abstract class Page {
   readonly dialogs = inject(Dialogs);
   readonly error = signal('');
   readonly busy = signal(false);
+  readonly running = signal(false);
   readonly rows = signal<Row[]>([]);
   async load(path: string) {
     this.busy.set(true);
@@ -164,13 +175,17 @@ export abstract class Page {
       this.busy.set(false);
     }
   }
-  async run(method: string, path: string, body: unknown, reload: () => void) {
+  async run(method: string, path: string, body: unknown, reload: () => void | Promise<void>) {
+    if (this.running()) return;
+    this.running.set(true);
     this.error.set('');
     try {
       await this.api.request(method, path, body);
-      reload();
+      await reload();
     } catch (e) {
       this.error.set((e as Error).message);
+    } finally {
+      this.running.set(false);
     }
   }
 }

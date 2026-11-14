@@ -122,6 +122,13 @@ export class InventoryPage extends Page {
       {
         title: 'stockMovement',
         path: 'movements',
+        hint: (value) => {
+          const product = this.rows().find((row) => row.id === value['productId']);
+          return product ? `${this.i.t('lastKnownStock')}: ${product.quantity ?? '—'}` : '';
+        },
+        onRejected: async (code) => {
+          if (code === 'INSUFFICIENT_STOCK') this.rows.set(await this.api.list('products'));
+        },
         fields: [
           {
             key: 'productId',
@@ -171,7 +178,9 @@ export class InventoryPage extends Page {
   imports: [...UI, State],
   template: `<header class="page-header">
       <h1>{{ i.t('movements') }}</h1>
-      <button mat-stroked-button (click)="load('movements')">{{ i.t('refresh') }}</button>
+      <button mat-stroked-button (click)="load('movements')" [disabled]="busy()">
+        {{ i.t('refresh') }}
+      </button>
     </header>
     <app-state [busy]="busy()" [error]="error()" />
     <section class="surface table-scroll">
@@ -179,6 +188,7 @@ export class InventoryPage extends Page {
         <thead>
           <tr>
             <th>{{ i.t('date') }}</th>
+            <th>{{ i.t('performedBy') }}</th>
             <th>{{ i.t('product') }}</th>
             <th>{{ i.t('type') }}</th>
             <th>{{ i.t('quantity') }}</th>
@@ -188,15 +198,16 @@ export class InventoryPage extends Page {
         <tbody>
           @for (row of rows(); track row.id) {
             <tr>
-              <td>{{ i.formatDate(row.createdAt) }}</td>
+              <td>{{ i.formatDate(row.createdAt, true) }}</td>
+              <td class="actor-reference">{{ actorName(row) }}</td>
               <td>{{ names.get(row.productId ?? '') }}</td>
               <td>{{ i.t(row.type ?? '') }}</td>
               <td>{{ row.delta }}</td>
-              <td>{{ row.reason }}</td>
+              <td>{{ i.movementReason(row.reason) }}</td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="empty">{{ i.t('empty') }}</td>
+              <td colspan="6" class="empty">{{ i.t('empty') }}</td>
             </tr>
           }
         </tbody>
@@ -204,17 +215,36 @@ export class InventoryPage extends Page {
     </section>`,
 })
 export class MovementPage extends Page {
+  private session = inject(Session);
   readonly names = new Map<string, string>();
+  readonly actors = new Map<string, string>();
   constructor() {
     super();
     void this.init();
   }
   async init() {
+    this.busy.set(true);
     try {
+      const user = this.session.user();
+      if (user) this.actors.set(user.id, user.name);
+      if (user?.role === 'ADMIN') {
+        // Display names are optional; a missing directory must not hide movements.
+        for (const employee of await this.api.list('employees').catch(() => [])) {
+          this.actors.set(employee.userId ?? employee.id, employee.name ?? employee.id);
+        }
+      }
       for (const p of await this.api.list('products')) this.names.set(p.id, p.name ?? p.id);
       await this.load('movements');
     } catch (e) {
       this.error.set((e as Error).message);
+    } finally {
+      this.busy.set(false);
     }
+  }
+  actorName(row: Row) {
+    const id = row.actorId ?? row.userId;
+    return id
+      ? (this.actors.get(id) ?? `${this.i.t('userReference')}: ${id}`)
+      : this.i.t('actorUnavailable');
   }
 }

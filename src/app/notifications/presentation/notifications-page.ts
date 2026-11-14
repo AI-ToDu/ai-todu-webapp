@@ -8,7 +8,7 @@ import { Row } from '../../shared/domain/models';
       <h1>{{ i.t('notifications') }}</h1>
       <button mat-stroked-button (click)="load('notifications')">{{ i.t('refresh') }}</button>
     </header>
-    <app-state [busy]="busy()" [error]="error()" />
+    <app-state [busy]="busy() || running()" [error]="error()" />
     <section class="surface notification-list">
       @for (n of rows(); track n.id) {
         <article>
@@ -17,7 +17,9 @@ import { Row } from '../../shared/domain/models';
             <p>{{ i.formatDate(n.createdAt) }}</p>
           </div>
           @if (!n.read) {
-            <button mat-stroked-button (click)="read(n)">{{ i.t('read') }}</button>
+            <button mat-stroked-button (click)="read(n)" [disabled]="running()">
+              {{ i.t(running() ? 'saving' : 'read') }}
+            </button>
           }
         </article>
       } @empty {
@@ -31,11 +33,8 @@ export class NotificationsPage extends Page {
     void this.load('notifications');
   }
   read(n: Row) {
-    void this.run(
-      'PATCH',
-      'notifications/' + n.id,
-      { read: true },
-      () => void this.load('notifications'),
+    void this.run('PATCH', 'notifications/' + n.id, { read: true }, () =>
+      this.load('notifications'),
     );
   }
 }
