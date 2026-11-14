@@ -1020,3 +1020,49 @@ tbody tr:hover {
     box-shadow: none !important;
   }
 }
+
+/* Keep row actions reachable while data columns scroll on narrow screens. */
+.actions-cell {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  width: 144px;
+  min-width: 120px;
+  max-width: 160px;
+  background: #fff;
+  box-shadow: -6px 0 9px -9px #304b59;
+}
+th.actions-cell {
+  background: #fbfcfd;
+}
+.actions-cell button {
+  white-space: normal;
+  min-height: 44px;
+}
+.product-cta {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #176c60;
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.product-card:focus-visible {
+  outline: 3px solid #176c60;
+  outline-offset: 3px;
+}
+.product-card:disabled .product-cta {
+  background: #e4e9eb;
+  color: #354953;
+}
+.form-hint {
+  color: var(--ink);
+  margin: 0 0 16px;
+}
+.actor-reference {
+  overflow-wrap: anywhere;
+}

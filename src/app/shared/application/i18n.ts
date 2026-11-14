@@ -1,5 +1,20 @@
 import { Injectable, signal } from '@angular/core';
 const en: Record<string, string> = {
+  performedBy: 'Performed by',
+  userReference: 'User reference',
+  actorUnavailable: 'Not recorded',
+  saleConfirmationReason: 'Sale confirmation',
+  purchaseReceiptReason: 'Purchase receipt',
+  openingBalanceReason: 'Demonstration opening balance',
+  notificationProductUnavailable: 'Product reference unavailable',
+  lastKnownStock: 'Last consulted available units',
+  addToCart: 'Add to sale',
+  outOfStock: 'Out of stock',
+  unavailableForSale: 'Not available for sale',
+  productsCount: 'products',
+  availableUnits: 'Available units',
+  saving: 'Saving… Please wait',
+
   serverNote:
     'Your workspace is stored on the server and shared with its authorized users. Use fictional data for academic evaluation.',
   employeePasswordNote:
@@ -172,7 +187,7 @@ const en: Record<string, string> = {
   DEMO: 'Demo',
   UNAUTHENTICATED: 'Sign in again to continue.',
   FORBIDDEN: 'Your role does not have access to this operation.',
-  INSUFFICIENT_STOCK: 'The quantity exceeds the stock available. Review the cart.',
+  INSUFFICIENT_STOCK: 'The quantity exceeds the stock available. Review the available units.',
   INVALID_QUANTITY: 'Enter a positive whole quantity.',
   INVALID_MONEY: 'Enter a non-negative amount with up to two decimals.',
   INVALID_SKU: 'Use a SKU of 2–32 letters, digits or hyphens.',
@@ -235,11 +250,19 @@ export class I18n {
       currency: 'PEN',
     }).format(value ?? 0);
   }
-  formatDate(value: string | undefined) {
+  movementReason(value: string | undefined) {
+    if (!value) return '—';
+    if (value === 'Sale confirmation') return this.t('saleConfirmationReason');
+    if (value === 'Demonstration opening balance') return this.t('openingBalanceReason');
+    if (value.startsWith('Purchase receipt PO-'))
+      return this.t('purchaseReceiptReason') + ' ' + value.slice('Purchase receipt '.length);
+    return value;
+  }
+  formatDate(value: string | undefined, precise = false) {
     return value
       ? new Intl.DateTimeFormat(this.lang() === 'en_US' ? 'en-US' : 'es-PE', {
           dateStyle: 'medium',
-          timeStyle: 'short',
+          timeStyle: precise ? 'long' : 'short',
         }).format(new Date(value))
       : '—';
   }

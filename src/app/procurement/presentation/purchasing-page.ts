@@ -30,7 +30,7 @@ import { Row } from '../../shared/domain/models';
             <th>{{ i.t('product') }}</th>
             <th>{{ i.t('received') }} / {{ i.t('ordered') }}</th>
             <th>{{ i.t('status') }}</th>
-            <th>{{ i.t('actions') }}</th>
+            <th class="actions-cell">{{ i.t('actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -56,7 +56,7 @@ import { Row } from '../../shared/domain/models';
                   i.t(order.status ?? '')
                 }}</span>
               </td>
-              <td>
+              <td class="actions-cell">
                 @if (order.status !== 'RECEIVED') {
                   <button mat-button (click)="receive(order)">{{ i.t('receive') }}</button>
                 }
@@ -79,6 +79,7 @@ export class PurchasingPage extends Page {
     void this.reload();
   }
   async reload() {
+    this.busy.set(true);
     this.error.set('');
     try {
       const [p, s] = await Promise.all([this.api.list('products'), this.api.list('suppliers')]);
@@ -87,6 +88,8 @@ export class PurchasingPage extends Page {
       await this.load('purchases');
     } catch (e) {
       this.error.set((e as Error).message);
+    } finally {
+      this.busy.set(false);
     }
   }
   supplierName(o: Row) {

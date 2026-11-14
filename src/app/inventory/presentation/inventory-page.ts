@@ -2,6 +2,7 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { Page, UI, State } from '../../shared/presentation/ui';
 import { Session } from '../../shared/infrastructure/api';
 import { Row } from '../../shared/domain/models';
+import { ActivatedRoute } from '@angular/router';
 @Component({
   standalone: true,
   imports: [...UI, State],
@@ -26,7 +27,8 @@ import { Row } from '../../shared/domain/models';
             matInput
             [ngModel]="query()"
             (ngModelChange)="query.set($event)" /></mat-form-field
-        ><span class="count">{{ filtered().length }} / {{ rows().length }}</span
+        ><span class="count"
+          >{{ filtered().length }} / {{ rows().length }} {{ i.t('productsCount') }}</span
         ><button mat-button (click)="load('products')">{{ i.t('refresh') }}</button>
       </div>
       <div class="table-scroll">
@@ -34,12 +36,12 @@ import { Row } from '../../shared/domain/models';
           <thead>
             <tr>
               <th>{{ i.t('product') }}</th>
-              <th>{{ i.t('available') }}</th>
+              <th>{{ i.t('availableUnits') }}</th>
               <th>{{ i.t('price') }}</th>
               <th>{{ i.t('cost') }}</th>
               <th>{{ i.t('conservation') }}</th>
               @if (editable) {
-                <th>{{ i.t('actions') }}</th>
+                <th class="actions-cell">{{ i.t('actions') }}</th>
               }
             </tr>
           </thead>
@@ -64,7 +66,7 @@ import { Row } from '../../shared/domain/models';
                   }}</span>
                 </td>
                 @if (editable) {
-                  <td>
+                  <td class="actions-cell">
                     <button
                       mat-button
                       (click)="conservation(p)"
@@ -87,7 +89,7 @@ import { Row } from '../../shared/domain/models';
 })
 export class InventoryPage extends Page {
   private session = inject(Session);
-  readonly query = signal('');
+  readonly query = signal(inject(ActivatedRoute).snapshot.queryParamMap.get('sku') ?? '');
   readonly filtered = computed(() =>
     this.rows().filter((p) =>
       (p.name + ' ' + p.sku).toLowerCase().includes(this.query().trim().toLowerCase()),
@@ -121,6 +123,13 @@ export class InventoryPage extends Page {
       {
         title: 'stockMovement',
         path: 'movements',
+        hint: (value) => {
+          const product = this.rows().find((row) => row.id === value['productId']);
+          return product ? `${this.i.t('lastKnownStock')}: ${product.quantity ?? '—'}` : '';
+        },
+        onRejected: async (code) => {
+          if (code === 'INSUFFICIENT_STOCK') this.rows.set(await this.api.list('products'));
+        },
         fields: [
           {
             key: 'productId',
@@ -170,7 +179,9 @@ export class InventoryPage extends Page {
   imports: [...UI, State],
   template: `<header class="page-header">
       <h1>{{ i.t('movements') }}</h1>
-      <button mat-stroked-button (click)="load('movements')">{{ i.t('refresh') }}</button>
+      <button mat-stroked-button (click)="load('movements')" [disabled]="busy()">
+        {{ i.t('refresh') }}
+      </button>
     </header>
     <app-state [busy]="busy()" [error]="error()" />
     <section class="surface table-scroll">
@@ -178,6 +189,7 @@ export class InventoryPage extends Page {
         <thead>
           <tr>
             <th>{{ i.t('date') }}</th>
+            <th>{{ i.t('performedBy') }}</th>
             <th>{{ i.t('product') }}</th>
             <th>{{ i.t('type') }}</th>
             <th>{{ i.t('quantity') }}</th>
@@ -187,15 +199,16 @@ export class InventoryPage extends Page {
         <tbody>
           @for (row of rows(); track row.id) {
             <tr>
-              <td>{{ i.formatDate(row.createdAt) }}</td>
+              <td>{{ i.formatDate(row.createdAt, true) }}</td>
+              <td class="actor-reference">{{ actorName(row) }}</td>
               <td>{{ names.get(row.productId ?? '') }}</td>
               <td>{{ i.t(row.type ?? '') }}</td>
               <td>{{ row.delta }}</td>
-              <td>{{ row.reason }}</td>
+              <td>{{ i.movementReason(row.reason) }}</td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="empty">{{ i.t('empty') }}</td>
+              <td colspan="6" class="empty">{{ i.t('empty') }}</td>
             </tr>
           }
         </tbody>
@@ -203,17 +216,36 @@ export class InventoryPage extends Page {
     </section>`,
 })
 export class MovementPage extends Page {
+  private session = inject(Session);
   readonly names = new Map<string, string>();
+  readonly actors = new Map<string, string>();
   constructor() {
     super();
     void this.init();
   }
   async init() {
+    this.busy.set(true);
     try {
+      const user = this.session.user();
+      if (user) this.actors.set(user.id, user.name);
+      if (user?.role === 'ADMIN') {
+        // Display names are optional; a missing directory must not hide movements.
+        for (const employee of await this.api.list('employees').catch(() => [])) {
+          this.actors.set(employee.userId ?? employee.id, employee.name ?? employee.id);
+        }
+      }
       for (const p of await this.api.list('products')) this.names.set(p.id, p.name ?? p.id);
       await this.load('movements');
     } catch (e) {
       this.error.set((e as Error).message);
+    } finally {
+      this.busy.set(false);
     }
+  }
+  actorName(row: Row) {
+    const id = row.actorId ?? row.userId;
+    return id
+      ? (this.actors.get(id) ?? `${this.i.t('userReference')}: ${id}`)
+      : this.i.t('actorUnavailable');
   }
 }
