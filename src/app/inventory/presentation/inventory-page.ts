@@ -26,7 +26,8 @@ import { Row } from '../../shared/domain/models';
             matInput
             [ngModel]="query()"
             (ngModelChange)="query.set($event)" /></mat-form-field
-        ><span class="count">{{ filtered().length }} / {{ rows().length }}</span
+        ><span class="count"
+          >{{ filtered().length }} / {{ rows().length }} {{ i.t('productsCount') }}</span
         ><button mat-button (click)="load('products')">{{ i.t('refresh') }}</button>
       </div>
       <div class="table-scroll">
@@ -34,12 +35,12 @@ import { Row } from '../../shared/domain/models';
           <thead>
             <tr>
               <th>{{ i.t('product') }}</th>
-              <th>{{ i.t('available') }}</th>
+              <th>{{ i.t('availableUnits') }}</th>
               <th>{{ i.t('price') }}</th>
               <th>{{ i.t('cost') }}</th>
               <th>{{ i.t('conservation') }}</th>
               @if (editable) {
-                <th>{{ i.t('actions') }}</th>
+                <th class="actions-cell">{{ i.t('actions') }}</th>
               }
             </tr>
           </thead>
@@ -64,7 +65,7 @@ import { Row } from '../../shared/domain/models';
                   }}</span>
                 </td>
                 @if (editable) {
-                  <td>
+                  <td class="actions-cell">
                     <button
                       mat-button
                       (click)="conservation(p)"

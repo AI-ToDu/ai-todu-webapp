@@ -61,7 +61,8 @@ export class ReceiptDialog {
             <button
               class="product-card"
               (click)="add(p)"
-              [disabled]="!p.quantity || p.conservation !== 'GOOD'"
+              [disabled]="!p.quantity || p.conservation !== 'GOOD' || submitting()"
+              [attr.aria-label]="i.t('addToCart') + ': ' + p.name"
             >
               <code>{{ p.sku }}</code
               ><strong>{{ p.name }}</strong
@@ -69,6 +70,15 @@ export class ReceiptDialog {
                 ><span>{{ i.formatMoney(p.price ?? 0) }}</span
                 ><span>{{ i.t('stock') }}: {{ p.quantity }}</span></span
               >
+              <span class="product-cta">{{
+                i.t(
+                  !p.quantity
+                    ? 'outOfStock'
+                    : p.conservation !== 'GOOD'
+                      ? 'unavailableForSale'
+                      : 'addToCart'
+                )
+              }}</span>
             </button>
           }
         </div>
@@ -82,14 +92,15 @@ export class ReceiptDialog {
               <button
                 mat-icon-button
                 (click)="change(line.product.id, -1)"
+                [disabled]="submitting()"
                 [attr.aria-label]="i.t('quantity') + ' − ' + line.product.name"
               >
                 −</button
-              ><span>{{ line.quantity }}</span
+              ><span aria-live="polite">{{ line.quantity }}</span
               ><button
                 mat-icon-button
                 (click)="change(line.product.id, 1)"
-                [disabled]="line.quantity >= (line.product.quantity ?? 0)"
+                [disabled]="submitting() || line.quantity >= (line.product.quantity ?? 0)"
                 [attr.aria-label]="i.t('quantity') + ' + ' + line.product.name"
               >
                 +</button
@@ -104,7 +115,7 @@ export class ReceiptDialog {
           ><strong>{{ i.formatMoney(total()) }}</strong>
         </div>
         <button mat-flat-button (click)="checkout()" [disabled]="!cart().length || submitting()">
-          {{ i.t('checkout') }}
+          {{ i.t(submitting() ? 'saving' : 'checkout') }}
         </button>
       </section>
     </div>
@@ -120,7 +131,7 @@ export class ReceiptDialog {
               <th>{{ i.t('date') }}</th>
               <th>{{ i.t('total') }}</th>
               <th>{{ i.t('status') }}</th>
-              <th>{{ i.t('actions') }}</th>
+              <th class="actions-cell">{{ i.t('actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -136,7 +147,7 @@ export class ReceiptDialog {
                     i.t(s.status ?? '')
                   }}</span>
                 </td>
-                <td>
+                <td class="actions-cell">
                   <button mat-button (click)="receipt(s)">{{ i.t('receiptTitle') }}</button>
                   @if (s.status === 'CONFIRMED') {
                     <button mat-button (click)="cancel(s)">{{ i.t('cancelSale') }}</button>
@@ -177,7 +188,7 @@ export class SalesPage extends Page {
   }
   add(p: Row) {
     const existing = this.cart().find((l) => l.product.id === p.id);
-    if ((existing?.quantity ?? 0) >= (p.quantity ?? 0)) return;
+    if (this.submitting() || (existing?.quantity ?? 0) >= (p.quantity ?? 0)) return;
     if (existing) this.change(p.id, 1);
     else this.cart.update((lines) => [...lines, { product: p, quantity: 1 }]);
   }

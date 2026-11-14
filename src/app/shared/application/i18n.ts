@@ -1,5 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 const en: Record<string, string> = {
+  addToCart: 'Add to sale',
+  outOfStock: 'Out of stock',
+  unavailableForSale: 'Not available for sale',
+  productsCount: 'products',
+  availableUnits: 'Available units',
+  saving: 'Saving… Please wait',
+
   serverNote:
     'Your workspace is stored on the server and shared with its authorized users. Use fictional data for academic evaluation.',
   employeePasswordNote:

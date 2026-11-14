@@ -190,5 +190,11 @@
   "UPSTREAM_UNAVAILABLE": "El servicio externo no está disponible temporalmente.",
   "IDEMPOTENCY_CONFLICT": "Este identificador de solicitud ya se utilizó con otros datos.",
   "CONFLICT": "Ya existe un registro con esos datos.",
-  "INTERNAL_ERROR": "El servidor no pudo completar la operación. Vuelve a intentarlo."
+  "INTERNAL_ERROR": "El servidor no pudo completar la operación. Vuelve a intentarlo.",
+  "addToCart": "Agregar a la venta",
+  "outOfStock": "Sin existencias",
+  "unavailableForSale": "No disponible para venta",
+  "productsCount": "productos",
+  "availableUnits": "Unidades disponibles",
+  "saving": "Guardando… Espera un momento"
 }
