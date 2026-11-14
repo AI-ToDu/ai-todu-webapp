@@ -150,7 +150,7 @@
   "DEMO": "Demo",
   "UNAUTHENTICATED": "Vuelve a iniciar sesión para continuar.",
   "FORBIDDEN": "Tu rol no tiene acceso a esta operación.",
-  "INSUFFICIENT_STOCK": "La cantidad supera el stock disponible. Revisa el carrito.",
+  "INSUFFICIENT_STOCK": "La cantidad supera el stock disponible. Revisa las unidades disponibles.",
   "INVALID_QUANTITY": "Ingresa una cantidad entera positiva.",
   "INVALID_MONEY": "Ingresa un importe no negativo de hasta dos decimales.",
   "INVALID_SKU": "Usa un SKU de 2 a 32 letras, números o guiones.",
@@ -202,5 +202,7 @@
   "actorUnavailable": "No registrado",
   "saleConfirmationReason": "Confirmación de venta",
   "purchaseReceiptReason": "Recepción de compra",
-  "lastKnownStock": "Último saldo disponible consultado"
+  "lastKnownStock": "Último saldo disponible consultado",
+  "openingBalanceReason": "Saldo inicial de demostración",
+  "notificationProductUnavailable": "Referencia de producto no disponible"
 }

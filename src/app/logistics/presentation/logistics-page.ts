@@ -159,12 +159,7 @@ export class LogisticsPage extends Page {
     );
   }
   start(d: Row) {
-    void this.run(
-      'PATCH',
-      `dispatches/${d.id}`,
-      { status: 'IN_TRANSIT' },
-      () => void this.reload(),
-    );
+    void this.run('PATCH', `dispatches/${d.id}`, { status: 'IN_TRANSIT' }, () => this.reload());
   }
   deliver(d: Row) {
     this.dialogs.form(
@@ -175,7 +170,7 @@ export class LogisticsPage extends Page {
         fields: [{ key: 'recipient', label: 'recipient' }],
         payload: (v) => ({ ...v, status: 'DELIVERED' }),
       },
-      () => void this.reload(),
+      () => this.reload(),
     );
   }
   incident(d: Row) {
@@ -185,7 +180,7 @@ export class LogisticsPage extends Page {
         path: `dispatches/${d.id}/incidents`,
         fields: [{ key: 'description', label: 'description', type: 'textarea' }],
       },
-      () => void this.reload(),
+      () => this.reload(),
     );
   }
   driver() {
@@ -198,7 +193,7 @@ export class LogisticsPage extends Page {
           { key: 'license', label: 'license' },
         ],
       },
-      () => void this.reload(),
+      () => this.reload(),
     );
   }
   vehicle() {
@@ -211,7 +206,7 @@ export class LogisticsPage extends Page {
           { key: 'plate', label: 'plate' },
         ],
       },
-      () => void this.reload(),
+      () => this.reload(),
     );
   }
 }

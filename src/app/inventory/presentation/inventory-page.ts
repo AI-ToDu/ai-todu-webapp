@@ -2,6 +2,7 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { Page, UI, State } from '../../shared/presentation/ui';
 import { Session } from '../../shared/infrastructure/api';
 import { Row } from '../../shared/domain/models';
+import { ActivatedRoute } from '@angular/router';
 @Component({
   standalone: true,
   imports: [...UI, State],
@@ -88,7 +89,7 @@ import { Row } from '../../shared/domain/models';
 })
 export class InventoryPage extends Page {
   private session = inject(Session);
-  readonly query = signal('');
+  readonly query = signal(inject(ActivatedRoute).snapshot.queryParamMap.get('sku') ?? '');
   readonly filtered = computed(() =>
     this.rows().filter((p) =>
       (p.name + ' ' + p.sku).toLowerCase().includes(this.query().trim().toLowerCase()),
